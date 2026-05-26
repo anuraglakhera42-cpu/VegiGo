@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Products - VegiGo{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-5">
+        <h1 class="display-5 fw-bold mb-2">Our Products</h1>
+        <p class="lead text-muted">Fresh and organic vegetables delivered straight to your home</p>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'products' %}"
+                   class="btn {% if not selected_category %}btn-success{% else %}btn-outline-success{% endif %}">
+                   All Products
+                </a>
+                {% for category in categories %}
+                    <a href="{% url 'products' %}?category={{ category.id }}"
+                       class="btn {% if selected_category == category.id|stringformat:'s' %}btn-success{% else %}btn-outline-success{% endif %}">
+                       {{ category.name }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-lg-4 col-md-6">
+            <div class="product-card card h-100">
+                <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-dark">
+                    <div class="product-img-wrapper">
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ product.name }}</h5>
+                        <p class="text-muted small mb-1">{{ product.description|truncatewords:10 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price fw-bold text-success fs-5">
+                                Rs. {{ product.get_price|floatformat:2 }}
+                            </span>
+                            <small class="text-muted">Stock: {{ product.stock }}</small>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Cart Section - AJAX powered, no page reload -->
+                <div class="card-footer bg-white border-top p-3">
+                    {% if product.is_in_stock %}
+
+                        <!-- Add to Cart Button -->
+                        <button
+                            class="btn btn-success w-100"
+                            id="add-btn-{{ product.id }}"
+                            onclick="addToCartAjax('{{ product.id }}', this)"
+                        >
+                            Add to Cart
+                        </button>
+
+                        <!-- Qty Control (hidden initially, shown after adding) -->
+                        <div class="d-none" id="qty-control-{{ product.id }}">
+                            <div class="d-flex align-items-center justify-content-between border rounded p-1">
+                                <button class="btn btn-outline-secondary btn-sm px-3 py-1"
+                                    onclick="changeQty('{{ product.id }}', -1)">
+                                    &minus;
+                                </button>
+                                <span class="fw-bold text-success fs-5" id="qty-num-{{ product.id }}">1</span>
+                                <button class="btn btn-outline-success btn-sm px-3 py-1"
+                                    onclick="changeQty('{{ product.id }}', 1)">
+                                    +
+                                </button>
+                            </div>
+                            <button class="btn btn-link btn-sm text-danger w-100 mt-1 p-0"
+                                style="font-size:12px;"
+                                onclick="removeFromCartInline('{{ product.id }}')">
+                                Remove from cart
+                            </button>
+                        </div>
+
+                    {% else %}
+                        <button class="btn btn-secondary w-100" disabled>Out of Stock</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-muted text-center py-5">No products found.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+<!-- AJAX Cart JavaScript -->
+<script>
+    function getCsrfToken() {
+        return document.cookie.split(';')
+            .find(c => c.trim().startsWith('csrftoken='))
+            ?.split('=')[1] || '';
+    }
+
+    function updateNavbarBadge(count) {
+        const badge = document.getElementById('cart-count-badge');
+        if (!badge) return;
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+
+    // Add to cart - page redirect nahi hoga
+    function addToCartAjax(productId, btn) {
+        btn.disabled = true;
+        btn.innerHTML = 'Adding&hellip;';
+
+        fetch('/cart/add/' + productId + '/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'quantity=1'
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                // Add button chupao
+                document.getElementById('add-btn-' + productId).classList.add('d-none');
+                // Qty control dikhao
+                document.getElementById('qty-control-' + productId).classList.remove('d-none');
+                // Qty set karo
+                document.getElementById('qty-num-' + productId).textContent = data.item_quantity || 1;
+                // Navbar badge update
+                updateNavbarBadge(data.cart_count);
+                showToast(data.message);
+            } else {
+                alert(data.message);
+                btn.disabled = false;
+                btn.textContent = 'Add to Cart';
+            }
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.textContent = 'Add to Cart';
+        });
+    }
+
+    // Quantity + ya - karo
+    function changeQty(productId, delta) {
+        const qtyEl = document.getElementById('qty-num-' + productId);
+        const currentQty = parseInt(qtyEl.textContent);
+        const newQty = currentQty + delta;
+
+        if (newQty <= 0) {
+            removeFromCartInline(productId);
+            return;
+        }
+
+        if (delta > 0) {
+            // Plus: ek aur add karo
+            fetch('/cart/add/' + productId + '/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'quantity=1'
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    qtyEl.textContent = data.item_quantity;
+                    updateNavbarBadge(data.cart_count);
+                }
+            });
+        } else {
+            // Minus: quantity update karo
+            fetch('/cart/update/' + productId + '/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=update&quantity=' + newQty
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    qtyEl.textContent = newQty;
+                    updateNavbarBadge(data.cart_count);
+                }
+            });
+        }
+    }
+
+    // Item remove karo - button wapas aayega
+    function removeFromCartInline(productId) {
+        fetch('/cart/update/' + productId + '/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'action=remove'
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('qty-control-' + productId).classList.add('d-none');
+                const btn = document.getElementById('add-btn-' + productId);
+                btn.classList.remove('d-none');
+                btn.disabled = false;
+                btn.textContent = 'Add to Cart';
+                updateNavbarBadge(data.cart_count);
+                showToast('Item cart se remove ho gaya');
+            }
+        });
+    }
+
+    // Simple notification
+    function showToast(msg) {
+        const old = document.getElementById('vg-toast');
+        if (old) old.remove();
+        const t = document.createElement('div');
+        t.id = 'vg-toast';
+        t.textContent = msg;
+        t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);' +
+            'background:#1a5e35;color:white;padding:12px 24px;border-radius:10px;' +
+            'font-size:14px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2);';
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2500);
+    }
+</script>
+{% endblock %}

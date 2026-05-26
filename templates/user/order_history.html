@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="main-content pt-5">
+<div class="container py-5">
+
+    <!-- Header -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">My Orders</h2>
+        <p class="text-muted">Track and manage your orders</p>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4 text-center">
+                    <div class="rounded-circle bg-success d-flex align-items-center justify-content-center mx-auto mb-3"
+                         style="width: 80px; height: 80px; font-size: 2rem; color: white;">
+                        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                    </div>
+                    <h6 class="fw-bold mb-0">{{ user.first_name }} {{ user.last_name }}</h6>
+                    <small class="text-muted">{{ user.email }}</small>
+                </div>
+            </div>
+
+            <div class="list-group shadow-sm">
+                <a href="{% url 'profile' %}"
+                   class="list-group-item list-group-item-action fw-semibold">
+                    👤 My Profile
+                </a>
+                <a href="{% url 'order_history' %}"
+                   class="list-group-item list-group-item-action active fw-semibold">
+                    📦 My Orders
+                </a>
+                <a href="{% url 'logout' %}"
+                   class="list-group-item list-group-item-action text-danger fw-semibold">
+                    🚪 Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Orders List -->
+        <div class="col-lg-9">
+
+            {% if orders %}
+                {% for order in orders %}
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-body p-4">
+
+                        <!-- Order Header -->
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                            <div>
+                                <p class="fw-bold mb-0 text-success">{{ order.order_id }}</p>
+                                <small class="text-muted">{{ order.created_at|date:"d M Y, h:i A" }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge
+                                    {% if order.order_status == 'delivered' %}bg-success
+                                    {% elif order.order_status == 'shipped' %}bg-primary
+                                    {% elif order.order_status == 'processing' %}bg-info text-dark
+                                    {% elif order.order_status == 'cancelled' %}bg-danger
+                                    {% else %}bg-warning text-dark
+                                    {% endif %} mb-1">
+                                    {{ order.get_order_status_display }}
+                                </span>
+                                <br>
+                                <small class="text-muted">{{ order.payment_method|upper }}</small>
+                            </div>
+                        </div>
+
+                        <!-- Order Items Preview -->
+                        <div class="mb-3">
+                            {% for item in order.items.all|slice:":3" %}
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="text-muted small">•</span>
+                                <span class="small">{{ item.product_name }}
+                                    <span class="text-muted">× {{ item.quantity }}</span>
+                                </span>
+                            </div>
+                            {% endfor %}
+                            {% if order.items.count > 3 %}
+                                <small class="text-muted">+ {{ order.items.count|add:"-3" }} more items</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Order Footer -->
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top">
+                            <div>
+                                <span class="text-muted small">Total: </span>
+                                <span class="fw-bold text-success">₹{{ order.total_amount }}</span>
+                            </div>
+                            <a href="{% url 'order_detail' order.id %}"
+                               class="btn btn-sm btn-outline-success">
+                                View Details →
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+                {% endfor %}
+
+            {% else %}
+                <!-- Empty State -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-5 text-center">
+                        <div style="font-size: 4rem;">📦</div>
+                        <h4 class="fw-bold mt-3">No Orders Yet</h4>
+                        <p class="text-muted">You haven't placed any orders yet.</p>
+                        <a href="{% url 'products' %}" class="btn btn-success mt-2 px-4">
+                            🌿 Start Shopping
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+</main>
+{% endblock %}

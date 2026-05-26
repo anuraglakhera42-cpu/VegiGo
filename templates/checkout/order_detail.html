@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="main-content pt-5">
+<div class="container py-5">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Order Details</h2>
+            <p class="text-muted mb-0">Order ID: <strong class="text-success">{{ order.order_id }}</strong></p>
+        </div>
+        <div>
+            <span class="badge fs-6
+                {% if order.order_status == 'delivered' %}bg-success
+                {% elif order.order_status == 'shipped' %}bg-primary
+                {% elif order.order_status == 'processing' %}bg-info text-dark
+                {% elif order.order_status == 'cancelled' %}bg-danger
+                {% else %}bg-warning text-dark
+                {% endif %}">
+                {{ order.get_order_status_display }}
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Left: Items + Tracking -->
+        <div class="col-lg-8">
+
+            <!-- Order Items -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">📦 Items Ordered</h5>
+
+                    {% for item in order_items %}
+                    <div class="d-flex justify-content-between align-items-center py-3
+                                {% if not forloop.last %}border-bottom{% endif %}">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                                 style="width: 55px; height: 55px; font-size: 1.5rem; flex-shrink: 0;">
+                                {% if item.product and item.product.image %}
+                                    <img src="{{ item.product.image.url }}" width="55" height="55"
+                                         class="rounded" style="object-fit: cover;">
+                                {% else %}
+                                    🌿
+                                {% endif %}
+                            </div>
+                            <div>
+                                <p class="mb-0 fw-semibold">{{ item.product_name }}</p>
+                                <small class="text-muted">₹{{ item.price }} × {{ item.quantity }}</small>
+                            </div>
+                        </div>
+                        <span class="fw-bold text-success">₹{{ item.get_cost }}</span>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Totals -->
+                    <div class="mt-4 pt-3 border-top">
+                        <div class="d-flex justify-content-between mb-1 text-muted">
+                            <span>Subtotal</span>
+                            <span>₹{{ order.subtotal }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1 text-muted">
+                            <span>Shipping</span>
+                            <span>₹{{ order.shipping_cost }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 text-muted">
+                            <span>GST (18%)</span>
+                            <span>₹{{ order.tax|floatformat:2 }}</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold fs-5">
+                            <span>Total</span>
+                            <span class="text-success">₹{{ order.total_amount|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Timeline -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">📍 Order Timeline</h5>
+                    <div class="timeline">
+
+                        <!-- Placed -->
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="text-center" style="min-width: 30px;">
+                                <div class="rounded-circle bg-success d-flex align-items-center justify-content-center"
+                                     style="width: 30px; height: 30px; color: white; font-size: 0.8rem;">✓</div>
+                                <div class="bg-success" style="width: 2px; height: 30px; margin: 0 auto;"></div>
+                            </div>
+                            <div>
+                                <p class="fw-semibold mb-0">Order Placed</p>
+                                <small class="text-muted">{{ order.created_at|date:"d M Y, h:i A" }}</small>
+                            </div>
+                        </div>
+
+                        <!-- Processing -->
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="text-center" style="min-width: 30px;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center
+                                    {% if order.order_status == 'processing' or order.order_status == 'shipped' or order.order_status == 'delivered' %}
+                                        bg-success text-white
+                                    {% else %}bg-light text-muted{% endif %}"
+                                     style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                    {% if order.order_status == 'processing' or order.order_status == 'shipped' or order.order_status == 'delivered' %}✓{% else %}2{% endif %}
+                                </div>
+                                <div class="{% if order.order_status == 'shipped' or order.order_status == 'delivered' %}bg-success{% else %}bg-light{% endif %}"
+                                     style="width: 2px; height: 30px; margin: 0 auto;"></div>
+                            </div>
+                            <div>
+                                <p class="fw-semibold mb-0">Processing</p>
+                                <small class="text-muted">Order is being prepared</small>
+                            </div>
+                        </div>
+
+                        <!-- Shipped -->
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="text-center" style="min-width: 30px;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center
+                                    {% if order.order_status == 'shipped' or order.order_status == 'delivered' %}bg-success text-white{% else %}bg-light text-muted{% endif %}"
+                                     style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                    {% if order.order_status == 'shipped' or order.order_status == 'delivered' %}✓{% else %}3{% endif %}
+                                </div>
+                                <div class="{% if order.order_status == 'delivered' %}bg-success{% else %}bg-light{% endif %}"
+                                     style="width: 2px; height: 30px; margin: 0 auto;"></div>
+                            </div>
+                            <div>
+                                <p class="fw-semibold mb-0">Shipped</p>
+                                <small class="text-muted">
+                                    {% if order.shipped_at %}{{ order.shipped_at|date:"d M Y" }}{% else %}Pending{% endif %}
+                                    {% if order.tracking_number %}· #{{ order.tracking_number }}{% endif %}
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Delivered -->
+                        <div class="d-flex gap-3">
+                            <div class="text-center" style="min-width: 30px;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center
+                                    {% if order.order_status == 'delivered' %}bg-success text-white{% else %}bg-light text-muted{% endif %}"
+                                     style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                    {% if order.order_status == 'delivered' %}✓{% else %}4{% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                <p class="fw-semibold mb-0">Delivered</p>
+                                <small class="text-muted">
+                                    {% if order.delivered_at %}{{ order.delivered_at|date:"d M Y" }}{% else %}Pending{% endif %}
+                                </small>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right: Customer & Payment Info -->
+        <div class="col-lg-4">
+
+            <!-- Delivery Address -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">🚚 Delivery Address</h6>
+                    <p class="fw-semibold mb-1">{{ order.customer_name }}</p>
+                    <p class="text-muted small mb-1">{{ order.shipping_address }}</p>
+                    <p class="text-muted small mb-1">{{ order.shipping_city }}, {{ order.shipping_state }}</p>
+                    <p class="text-muted small mb-2">Pincode: {{ order.shipping_pincode }}</p>
+                    <hr>
+                    <p class="small mb-1">📧 {{ order.customer_email }}</p>
+                    <p class="small mb-0">📞 {{ order.customer_phone }}</p>
+                </div>
+            </div>
+
+            <!-- Payment Info -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">💳 Payment Info</h6>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Method</span>
+                        <span class="fw-semibold small text-capitalize">{{ order.payment_method }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">Payment Status</span>
+                        <span class="badge
+                            {% if order.payment_status == 'completed' %}bg-success
+                            {% elif order.payment_status == 'failed' %}bg-danger
+                            {% else %}bg-warning text-dark{% endif %}">
+                            {{ order.get_payment_status_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-2">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'order_history' %}" class="btn btn-outline-success">← All Orders</a>
+                {% endif %}
+                <a href="{% url 'products' %}" class="btn btn-success">🌿 Shop Again</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+</main>
+{% endblock %}

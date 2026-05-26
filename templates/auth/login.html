@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="main-content pt-5">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+
+            <!-- Card -->
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4 p-md-5">
+
+                    <!-- Logo / Title -->
+                    <div class="text-center mb-4">
+                        <div style="font-size: 3rem;">🌿</div>
+                        <h3 class="fw-bold mt-2">Welcome Back</h3>
+                        <p class="text-muted small">Login to your VegiGo account</p>
+                    </div>
+
+                    <!-- Messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show py-2" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Login Form -->
+                    <form method="POST" action="{% url 'login' %}">
+                        <input type="hidden" name="next" value="{{ next|default:'' }}">
+                        {% csrf_token %}
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Email Address</label>
+                            <input type="email"
+                                   name="email"
+                                   class="form-control"
+                                   placeholder="you@example.com"
+                                   required
+                                   autofocus>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label fw-semibold small">Password</label>
+                                <a href="{% url 'password_reset' %}" class="text-success small">Forgot password?</a>
+                            </div>
+                            <input type="password"
+                                   name="password"
+                                   class="form-control"
+                                   placeholder="Enter your password"
+                                   required>
+                        </div>
+
+                        <!-- Remember Me -->
+                        <div class="mb-4 form-check">
+                            <input type="checkbox" name="remember_me" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label small" for="rememberMe">Remember me</label>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" class="btn btn-success w-100 fw-bold py-2">
+                            Login →
+                        </button>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="text-center my-3">
+                        <span class="text-muted small">Don't have an account?</span>
+                    </div>
+
+                    <!-- Sign Up Link -->
+                    <a href="{% url 'signup' %}" class="btn btn-outline-success w-100">
+                        Create Account
+                    </a>
+
+                    <!-- Guest Checkout -->
+                    <div class="text-center mt-3">
+                        <a href="{% url 'checkout' %}" class="text-muted small">
+                            Continue as Guest →
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</main>
+{% endblock %}

@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="main-content pt-5">
+<div class="container py-5">
+
+    <div class="mb-4">
+        <h1 class="display-6 fw-bold mb-1">Checkout</h1>
+        <p class="text-muted">Complete your order below</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% if form.errors %}
+<div class="alert alert-danger">
+    <strong>Please fix these errors:</strong>
+    <ul class="mb-0 mt-2">
+        {% for field in form %}
+            {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+
+        {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+    <form method="POST" action="{% url 'process_checkout' %}">
+        {% csrf_token %}
+        <div class="row g-4">
+
+            <div class="col-lg-7">
+
+                {% if not user.is_authenticated %}
+                <div class="alert alert-light border mb-4 py-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <span class="fw-semibold">Already have an account?</span>
+                            <span class="text-muted small ms-1">Login for faster checkout & order tracking</span>
+                        </div>
+                        <a href="{% url 'login' %}?next={% url 'checkout' %}" class="btn btn-sm btn-success">Login</a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">📋 Personal Details</h5>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+                                <input type="text" name="full_name" class="form-control"
+                                       placeholder="First and Last Name"
+                                       value="{% if user.is_authenticated %}{{ user.first_name }} {{ user.last_name }}{% endif %}"
+                                       required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Email <span class="text-danger">*</span></label>
+                                <input type="email" name="email" class="form-control"
+                                       placeholder="your@email.com"
+                                       value="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
+                                       required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Phone <span class="text-danger">*</span></label>
+                                <input type="tel" name="phone" class="form-control"
+                                       placeholder="10-digit mobile number"
+                                       value="{% if user.is_authenticated and user.userprofile.phone %}{{ user.userprofile.phone }}{% endif %}"
+                                       required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">🚚 Shipping Address</h5>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Street Address <span class="text-danger">*</span></label>
+                                <input type="text" name="street_address" class="form-control"
+                                       placeholder="House no., Street, Area"
+                                       value="{% if user.is_authenticated and user.userprofile.default_address %}{{ user.userprofile.default_address }}{% endif %}"
+                                       required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">City <span class="text-danger">*</span></label>
+                                <input type="text" name="city" class="form-control"
+                                       placeholder="City"
+                                       value="{% if user.is_authenticated and user.userprofile.default_city %}{{ user.userprofile.default_city }}{% endif %}"
+                                       required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">State <span class="text-danger">*</span></label>
+                                <input type="text" name="state" class="form-control"
+                                       placeholder="State"
+                                       value="{% if user.is_authenticated and user.userprofile.default_state %}{{ user.userprofile.default_state }}{% endif %}"
+                                       required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">Pincode <span class="text-danger">*</span></label>
+                                <input type="text" name="pincode" class="form-control"
+                                       placeholder="6-digit code"
+                                       maxlength="6"
+                                       value="{% if user.is_authenticated and user.userprofile.default_pincode %}{{ user.userprofile.default_pincode }}{% endif %}"
+                                       required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">💳 Payment Method</h5>
+
+                        <div class="d-flex flex-column gap-3">
+
+                            <div class="form-check border rounded-3 p-3 payment-option" id="cod-option">
+                                <input class="form-check-input" type="radio"
+                                       name="payment_method" id="cod" value="cod" checked
+                                       onchange="selectPayment('cod-option')">
+                                <label class="form-check-label w-100 ms-2" for="cod">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="fw-semibold">💵 Cash on Delivery</span><br>
+                                            <small class="text-muted">Pay when your order arrives</small>
+                                        </div>
+                                        <span class="badge bg-success">Recommended</span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="form-check border rounded-3 p-3 payment-option" id="upi-option">
+                                <input class="form-check-input" type="radio"
+                                       name="payment_method" id="upi" value="upi"
+                                       onchange="selectPayment('upi-option')">
+                                <label class="form-check-label w-100 ms-2" for="upi">
+                                    <span class="fw-semibold"> UPI / PhonePe / GPay</span><br>
+                                    <small class="text-muted">Instant payment via UPI</small>
+                                </label>
+                            </div>
+
+                            <div class="form-check border rounded-3 p-3 payment-option" id="card-option">
+                                <input class="form-check-input" type="radio"
+                                       name="payment_method" id="card" value="card"
+                                       onchange="selectPayment('card-option')">
+                                <label class="form-check-label w-100 ms-2" for="card">
+                                    <span class="fw-semibold">💳 Credit / Debit Card</span><br>
+                                    <small class="text-muted">All major cards accepted</small>
+                                </label>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="checkbox" name="terms_accepted" id="terms" required>
+                    <label class="form-check-label small" for="terms">
+                        I agree to the <a href="#" class="text-success">Terms & Conditions</a>
+                        and <a href="#" class="text-success">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 fw-bold py-3 d-lg-none mb-3">
+                    Place Order → ₹{{ totals.total|floatformat:2 }}
+                </button>
+
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 sticky-top" style="top: 80px;">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4"> Order Summary</h5>
+
+                        <div class="mb-4" style="max-height: 250px; overflow-y: auto;">
+                            {% for item in cart_items %}
+                            <div class="d-flex gap-3 mb-3">
+                                {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}"
+                                         alt="{{ item.product.name }}"
+                                         width="50" height="50"
+                                         class="rounded"
+                                         style="object-fit: cover; flex-shrink: 0;">
+                                {% else %}
+                                    <div class="rounded bg-light d-flex align-items-center justify-content-center"
+                                         style="width: 50px; height: 50px; font-size: 1.5rem; flex-shrink: 0;">
+                                        🌿
+                                    </div>
+                                {% endif %}
+
+                                <div class="flex-grow-1">
+                                    <p class="mb-0 fw-semibold small">{{ item.product.name }}</p>
+                                    <small class="text-muted">Qty: {{ item.quantity }}</small>
+                                </div>
+
+                                <div class="text-end">
+                                    <p class="mb-0 fw-bold small text-success">₹{{ item.get_cost }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <hr>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Subtotal</span>
+                                <span class="fw-semibold">₹{{ totals.subtotal }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Shipping</span>
+                                <span class="fw-semibold">₹{{ totals.shipping }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">GST (18%)</span>
+                                <span class="fw-semibold">₹{{ totals.tax|floatformat:2 }}</span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="fw-bold fs-5">Total</span>
+                            <span class="fw-bold fs-5 text-success">₹{{ totals.total|floatformat:2 }}</span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 fw-bold py-3 d-none d-lg-block">
+                            Place Order →
+                        </button>
+
+                        <div class="text-center mt-3">
+                            <small class="text-muted">🔒 100% Secure Checkout</small>
+                        </div>
+
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="row text-center g-2">
+                                <div class="col-4">
+                                    <small class="text-muted d-block">✅ Fresh</small>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted d-block">🚚 Fast</small>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted d-block">↩️ Returns</small>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+</div>
+</main>
+
+<script>
+function selectPayment(selectedId) {
+    document.querySelectorAll('.payment-option').forEach(el => {
+        el.classList.remove('border-success', 'bg-light');
+    });
+
+    const selected = document.getElementById(selectedId);
+    if (selected) {
+        selected.classList.add('border-success', 'bg-light');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    selectPayment('cod-option');
+});
+</script>
+{% endblock %}

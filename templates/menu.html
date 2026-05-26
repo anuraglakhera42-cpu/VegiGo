@@ -1,0 +1,85 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+    <div class="container-fluid px-3">
+        <a href="{% url 'home' %}" class="navbar-brand fw-bold">VegiGo</a>
+
+        <div class="search-container w-100 mt-2 order-lg-0 order-3">
+            <form class="d-flex" role="search" method="GET" action="{% url 'products' %}">
+                <input class="form-control search-input" id="search" type="search" placeholder="Search products..." aria-label="Search" name="search" value="{{ request.GET.search|default:'' }}">
+                <button class="btn btn-search" type="submit">Search</button>
+            </form>
+        </div>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto gap-1 align-items-lg-center">
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'home' %}active{% endif %}" href="{% url 'home' %}">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'products' %}active{% endif %}" href="{% url 'products' %}">Products</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'cart' %}active{% endif %} position-relative" href="{% url 'cart' %}">
+                        Cart
+                        <span id="cart-count-badge"
+                              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
+                              style="font-size: 0.65rem; display: none;">0</span>
+                    </a>
+                </li>
+
+                {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle fw-semibold text-success" href="#" id="userDropdown"
+                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ user.first_name|default:user.username }}
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userDropdown">
+                            <li>
+                                <span class="dropdown-item-text small text-muted">
+                                    {{ user.email }}
+                                </span>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li>
+                                <a class="dropdown-item" href="{% url 'profile' %}">My Profile</a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" href="{% url 'order_history' %}">My Orders</a>
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li>
+                                <form method="POST" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{% url 'signup' %}" class="btn btn-success btn-sm ms-1 px-3">Sign Up</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

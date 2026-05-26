@@ -1,0 +1,39 @@
+{% load static %}
+
+<footer class="bg-dark text-white mt-5 pt-5 pb-3" id="contact">
+    <div class="container-fluid">
+        <div class="row px-4">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <h5 class="fw-bold mb-3">VegiGo</h5>
+                <p class="text-light small">
+                    Fresh & organic products delivered to your doorstep.
+                    Quality you can trust, taste you will love.
+                </p>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <h6 class="fw-bold mb-3">Quick Links</h6>
+                <ul class="list-unstyled">
+                    <li><a href="{% url 'home' %}" class="footer-link">Home</a></li>
+                    <li><a href="{% url 'products' %}" class="footer-link">Products</a></li>
+                    <li><a href="{% url 'home' %}#about" class="footer-link">About Us</a></li>
+                    <li><a href="{% url 'home' %}#contact" class="footer-link">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-4 col-md-12 mb-4">
+                <h6 class="fw-bold mb-3">Follow Us</h6>
+                <div class="d-flex gap-3">
+                    <a href="#" class="social-link" title="Website">Web</a>
+                    <a href="#" class="social-link" title="Facebook">f</a>
+                    <a href="#" class="social-link" title="Instagram">Ig</a>
+                    <a href="#" class="social-link" title="Twitter">X</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center border-top pt-3 mt-3 small text-secondary">
+            <p class="mb-0">&copy; 2026 VegiGo. All Rights Reserved.</p>
+        </div>
+    </div>
+</footer>

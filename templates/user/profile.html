@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="main-content pt-5">
+<div class="container py-5">
+
+    <!-- Page Header -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">My Profile</h2>
+        <p class="text-muted">Manage your account details</p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+
+        <!-- Left: Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4 text-center">
+                    <!-- Avatar -->
+                    <div class="rounded-circle bg-success d-flex align-items-center justify-content-center mx-auto mb-3"
+                         style="width: 80px; height: 80px; font-size: 2rem; color: white;">
+                        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                    </div>
+                    <h6 class="fw-bold mb-0">{{ user.first_name }} {{ user.last_name }}</h6>
+                    <small class="text-muted">{{ user.email }}</small>
+                </div>
+            </div>
+
+            <!-- Nav Links -->
+            <div class="list-group shadow-sm">
+                <a href="{% url 'profile' %}"
+                   class="list-group-item list-group-item-action active fw-semibold">
+                    👤 My Profile
+                </a>
+                <a href="{% url 'order_history' %}"
+                   class="list-group-item list-group-item-action fw-semibold">
+                    📦 My Orders
+                </a>
+                <a href="{% url 'logout' %}"
+                   class="list-group-item list-group-item-action text-danger fw-semibold">
+                    🚪 Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Right: Profile Form -->
+        <div class="col-lg-9">
+            <form method="POST" action="{% url 'profile' %}">
+                {% csrf_token %}
+
+                <!-- Personal Information -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">👤 Personal Information</h5>
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">First Name</label>
+                                <input type="text" name="first_name"
+                                       class="form-control"
+                                       value="{{ user.first_name }}"
+                                       required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Last Name</label>
+                                <input type="text" name="last_name"
+                                       class="form-control"
+                                       value="{{ user.last_name }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Email Address</label>
+                                <input type="email" name="email"
+                                       class="form-control"
+                                       value="{{ user.email }}"
+                                       required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Phone Number</label>
+                                <input type="tel" name="phone"
+                                       class="form-control"
+                                       placeholder="10-digit mobile number"
+                                       value="{{ user.profile.phone }}">
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Default Address -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">🏠 Default Delivery Address</h5>
+                        <div class="row g-3">
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Street Address</label>
+                                <input type="text" name="default_address"
+                                       class="form-control"
+                                       placeholder="House no., Street, Area"
+                                       value="{{ user.profile.default_address }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">City</label>
+                                <input type="text" name="default_city"
+                                       class="form-control"
+                                       placeholder="City"
+                                       value="{{ user.profile.default_city }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">State</label>
+                                <input type="text" name="default_state"
+                                       class="form-control"
+                                       placeholder="State"
+                                       value="{{ user.profile.default_state }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">Pincode</label>
+                                <input type="text" name="default_pincode"
+                                       class="form-control"
+                                       placeholder="6-digit pincode"
+                                       maxlength="6"
+                                       value="{{ user.profile.default_pincode }}">
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-success px-5 fw-bold">
+                        Save Changes ✅
+                    </button>
+                    <a href="{% url 'password_reset' %}" class="btn btn-outline-secondary">
+                        Change Password
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+</main>
+{% endblock %}

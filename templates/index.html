@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <!-- Hero Section -->
+    <section class="venture-carousel-wrapper">
+  <div id="vegiGoCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+    
+    <!-- Indicators -->
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#vegiGoCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+      <button type="button" data-bs-target="#vegiGoCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+      <button type="button" data-bs-target="#vegiGoCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+
+    <!-- Slides -->
+    <div class="carousel-inner">
+
+      <!-- Slide 1 -->
+      <div class="carousel-item active">
+        <img src="{% static 'img1.jpg' %}" class="d-block w-100" alt="Fresh Hydroponic Greens">
+        <div class="carousel-overlay"></div>
+        <div class="carousel-caption custom-caption">
+          <h1>Fresh. Premium. Hydroponic.</h1>
+          <p>Discover farm-fresh greens and exotic produce from VegiGo.</p>
+          <a href="{% url 'products' %}" class="btn btn-success btn-lg me-2">Shop Now</a>
+          <a href="{% url 'products' %}" class="btn btn-outline-light btn-lg">Explore Products</a>
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="carousel-item">
+        <img src="{% static 'img2.jpg' %}" class="d-block w-100" alt="Fresh Salad Box">
+        <div class="carousel-overlay"></div>
+        <div class="carousel-caption custom-caption">
+          <h1>Healthy Salads, Ready to Go</h1>
+          <p>Crisp, clean, and carefully packed for your everyday freshness.</p>
+          <a href="{% url 'products' %}" class="btn btn-success btn-lg me-2">Order Now</a>
+          <a href="#about" class="btn btn-outline-light btn-lg">Why VegiGo</a>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="carousel-item">
+        <img src="{% static 'img3.jpg' %}" class="d-block w-100" alt="Exotic Fruits and Vegetables">
+        <div class="carousel-overlay"></div>
+        <div class="carousel-caption custom-caption">
+          <h1>Exotic Produce Delivered Fresh</h1>
+          <p>From avocados to premium salad mixes - freshness you can trust.</p>
+          <a href="{% url 'products' %}" class="btn btn-success btn-lg me-2">Buy Fresh</a>
+          <a href="#contact" class="btn btn-outline-light btn-lg">Contact Us</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Controls -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#vegiGoCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+
+    <button class="carousel-control-next" type="button" data-bs-target="#vegiGoCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+
+  </div>
+</section>
+
+
+        <!-- Benefits Section -->
+        <section class="benefits py-5" id="about">
+            <div class="container">
+                <h2 class="text-center mb-5 fw-bold">Why Choose VegiGo?</h2>
+                <div class="row g-4">
+                    
+                    <!-- Benefit Card 1 -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="benefit-card text-center p-4">
+                            <div class="benefit-icon mb-3"></div>
+                            <h5 class="fw-bold mb-2">100% Organic</h5>
+                            <p class="text-muted">No pesticides, no chemicals. Pure nature on your table.</p>
+                        </div>
+                    </div>
+
+                    <!-- Benefit Card 2 -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="benefit-card text-center p-4">
+                            <div class="benefit-icon mb-3"> </div>
+                            <h5 class="fw-bold mb-2">Fresh Daily</h5>
+                            <p class="text-muted">Harvested today, delivered tomorrow. Maximum freshness guaranteed.</p>
+                        </div>
+                    </div>
+
+                    <!-- Benefit Card 3 -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="benefit-card text-center p-4">
+                            <div class="benefit-icon mb-3"></div>
+                            <h5 class="fw-bold mb-2">Fast Delivery</h5>
+                            <p class="text-muted">Quick doorstep delivery within 24 hours of order.</p>
+                        </div>
+                    </div>
+
+                    <!-- Benefit Card 4 -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="benefit-card text-center p-4">
+                            <div class="benefit-icon mb-3"></div>
+                            <h5 class="fw-bold mb-2">Best Price</h5>
+                            <p class="text-muted">Fair prices without middlemen. Get the best value for money.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Products Section -->
+        <section class="featured-products py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center mb-5 fw-bold">Featured Products This Week</h2>
+                <div class="row g-4">
+
+                  {% for i in products %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="product-card card h-100">
+                            <a href="{% url 'product_detail' i.pk %}" class="text-decoration-none text-dark">
+                            <div class="product-img-wrapper">
+                                <img src="{{ i.image.url }}" class="card-img-top" alt="{{ i.name }}">
+                                <span class="badge-new">Fresh</span>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">{{ i.name }}</h5>
+                                <p class="card-text text-muted small">{{ i.description }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="price fw-bold text-success">₹{{ i.price }}/kg</span>
+                                </div>
+                            </div>
+                            </a>
+                            <div class="card-footer bg-white border-top p-3">
+                                <button class="btn btn-success w-100"
+                                    id="add-btn-{{ i.id }}"
+                                    onclick="addToCartAjax( '{{ i.id }}' , this)">
+                                    Add to Cart
+                                </button>
+                                <div class="d-none" id="qty-control-{{ i.id }}">
+                                    <div class="d-flex align-items-center justify-content-between border rounded p-1">
+                                        <button class="btn btn-outline-secondary btn-sm px-3" onclick="changeQty('{{ i.id }}', -1)">&minus;</button>
+                                        <span class="fw-bold text-success fs-5" id="qty-num-{{ i.id }}">1</span>
+                                        <button class="btn btn-outline-success btn-sm px-3" onclick="changeQty('{{ i.id }}', 1)">+</button>
+                                    </div>
+                                    <button class="btn btn-link btn-sm text-danger w-100 mt-1 p-0" style="font-size:12px;" onclick="removeFromCartInline('{{ i.id }}')">Remove from cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                </div>
+                <div class="text-center mt-5">
+                    <a href="{% url 'products' %}" class="btn btn-success btn-lg">View All Products</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section py-5 bg-success text-white">
+            <div class="container text-center">
+                <h2 class="mb-3 fw-bold">Get Fresh Produce Delivered Today!</h2>
+                <p class="lead mb-4">Join thousands of happy customers who are eating fresh, organic, and healthy</p>
+                <a href="{% url 'products' %}" class="btn btn-light btn-lg">Start Shopping</a>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    
+
+<script>
+    function getCsrfToken() {
+        return document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')[1] || '';
+    }
+    function updateNavbarBadge(count) {
+        const badge = document.getElementById('cart-count-badge');
+        if (!badge) return;
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+    function addToCartAjax(productId, btn) {
+        btn.disabled = true;
+        btn.innerHTML = 'Adding&hellip;';
+        fetch('/cart/add/' + productId + '/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCsrfToken(), 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'quantity=1'
+        }).then(r => r.json()).then(data => {
+            if (data.success) {
+                document.getElementById('add-btn-' + productId).classList.add('d-none');
+                document.getElementById('qty-control-' + productId).classList.remove('d-none');
+                document.getElementById('qty-num-' + productId).textContent = data.item_quantity || 1;
+                updateNavbarBadge(data.cart_count);
+                showToast(data.message);
+            } else { btn.disabled = false; btn.textContent = 'Add to Cart'; alert(data.message); }
+        }).catch(() => { btn.disabled = false; btn.textContent = 'Add to Cart'; });
+    }
+    function changeQty(productId, delta) {
+        const qtyEl = document.getElementById('qty-num-' + productId);
+        const newQty = parseInt(qtyEl.textContent) + delta;
+        if (newQty <= 0) { removeFromCartInline(productId); return; }
+        const url = delta > 0 ? '/cart/add/' + productId + '/' : '/cart/update/' + productId + '/';
+        const body = delta > 0 ? 'quantity=1' : 'action=update&quantity=' + newQty;
+        fetch(url, { method: 'POST', headers: { 'X-CSRFToken': getCsrfToken(), 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' }, body })
+        .then(r => r.json()).then(data => {
+            if (data.success) { qtyEl.textContent = delta > 0 ? data.item_quantity : newQty; updateNavbarBadge(data.cart_count); }
+        });
+    }
+    function removeFromCartInline(productId) {
+        fetch('/cart/update/' + productId + '/', { method: 'POST', headers: { 'X-CSRFToken': getCsrfToken(), 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'action=remove' })
+        .then(r => r.json()).then(data => {
+            if (data.success) {
+                document.getElementById('qty-control-' + productId).classList.add('d-none');
+                const btn = document.getElementById('add-btn-' + productId);
+                btn.classList.remove('d-none'); btn.disabled = false; btn.textContent = 'Add to Cart';
+                updateNavbarBadge(data.cart_count); showToast('Item cart se remove ho gaya');
+            }
+        });
+    }
+    function showToast(msg) {
+        const old = document.getElementById('vg-toast'); if (old) old.remove();
+        const t = document.createElement('div'); t.id = 'vg-toast'; t.textContent = msg;
+        t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a5e35;color:white;padding:12px 24px;border-radius:10px;font-size:14px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2);';
+        document.body.appendChild(t); setTimeout(() => t.remove(), 2500);
+    }
+</script>
+
+{% endblock %}
