@@ -39,7 +39,7 @@ def csv_config(name, default=''):
 
 ALLOWED_HOSTS = csv_config(
     'ALLOWED_HOSTS',
-    default='localhost,127.0.0.1,.onrender.com,.railway.app,.up.railway.app,.koyeb.app',
+    default='localhost,127.0.0.1,vegigo.up.railway.app,.onrender.com,.railway.app,.up.railway.app,.koyeb.app',
 )
 
 for env_var in ('RENDER_EXTERNAL_HOSTNAME', 'RAILWAY_PUBLIC_DOMAIN', 'KOYEB_PUBLIC_DOMAIN'):
