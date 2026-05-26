@@ -28,9 +28,32 @@ TEMP_DIR = BASE_DIR / "templates"
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
-if isinstance(ALLOWED_HOSTS, str):
-    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS.split(',') if host.strip()]
+
+
+def csv_config(name, default=''):
+    value = config(name, default=default, cast=Csv())
+    if isinstance(value, str):
+        return [item.strip() for item in value.split(',') if item.strip()]
+    return [item.strip() for item in value if item.strip()]
+
+
+ALLOWED_HOSTS = csv_config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1,.onrender.com,.railway.app,.up.railway.app,.koyeb.app',
+)
+
+for env_var in ('RENDER_EXTERNAL_HOSTNAME', 'RAILWAY_PUBLIC_DOMAIN', 'KOYEB_PUBLIC_DOMAIN'):
+    hostname = os.environ.get(env_var)
+    if hostname and hostname not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(hostname)
+
+CSRF_TRUSTED_ORIGINS = csv_config('CSRF_TRUSTED_ORIGINS')
+for host in ALLOWED_HOSTS:
+    if host in {'*', 'localhost', '127.0.0.1'} or host.startswith('.'):
+        continue
+    origin = f'https://{host}'
+    if origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
