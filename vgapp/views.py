@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 from django.urls import reverse_lazy
 from django.db import transaction
+from django.conf import settings
 
 from vgapp.models import (
     Product, Category, Cart, CartItem, Order, OrderItem, GuestUser, UserProfile
@@ -48,7 +49,13 @@ def get_cart_totals(cart):
     """Cart ka total calculate karo - subtotal, tax, shipping, grand total"""
     cart_items = cart.items.select_related('product').all()
     subtotal = sum(item.get_cost for item in cart_items)
-    shipping = decimal.Decimal('50.00') if subtotal < 500 else decimal.Decimal('0.00')
+    free_shipping_threshold = decimal.Decimal(str(settings.FREE_SHIPPING_THRESHOLD))
+    standard_shipping_cost = decimal.Decimal(str(settings.STANDARD_SHIPPING_COST))
+    free_shipping_remaining = max(
+        free_shipping_threshold - subtotal,
+        decimal.Decimal('0.00'),
+    )
+    shipping = standard_shipping_cost if free_shipping_remaining else decimal.Decimal('0.00')
     tax = (subtotal * decimal.Decimal('0.18')).quantize(decimal.Decimal('0.01'))
     total = subtotal + shipping + tax
 
@@ -57,6 +64,9 @@ def get_cart_totals(cart):
         'shipping': shipping,
         'tax': tax,
         'total': total,
+        'free_shipping_threshold': free_shipping_threshold,
+        'free_shipping_remaining': free_shipping_remaining,
+        'has_free_shipping': free_shipping_remaining == 0,
     }
 
 
@@ -306,6 +316,10 @@ def process_checkout(request):
         return redirect('products')
 
     totals = get_cart_totals(cart)
+
+    if not request.POST.get('no_cancel_ack'):
+        messages.error(request, 'Please confirm that this order cannot be cancelled after checkout.')
+        return redirect('checkout')
 
     if request.user.is_authenticated:
         form = UserCheckoutForm(request.POST)
